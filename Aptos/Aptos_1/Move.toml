@@ -1,0 +1,12 @@
+[package]
+name = "move_aptos_1"
+version = "1.0.0"
+authors = []
+
+[addresses]
+hello_aptos_network = "0x8af862716773ad75590029d55ed525f2532b7b9fc90aa943b145aedbb185768"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "devnet", subdir = "aptos-move/framework/aptos-framework" }
+
+[dev-dependencies]

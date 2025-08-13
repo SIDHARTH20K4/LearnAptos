@@ -1,0 +1,11 @@
+[package]
+name = "token_locker"
+version = "1.0.0"
+
+[addresses]
+token_locker = "0x123"  # Replace with your address
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "aptos-v7.7.0"  # Version-specific tag
+subdir = "aptos-move/framework/aptos-framework"

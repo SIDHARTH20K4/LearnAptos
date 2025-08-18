@@ -1,0 +1,16 @@
+[package]
+name = "basic-coin"
+version = "1.0.0"
+authors = []
+
+[addresses]
+basic_coin_addr = "0xb8a4dfe1362365fe74559c150c1af7c78e88b43d52c3dbdba7840fc1a897308d"
+
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-framework"
+
+[dev-dependencies]

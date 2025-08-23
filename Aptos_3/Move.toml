@@ -1,0 +1,15 @@
+[package]
+name = "sid"
+version = "1.0.0"
+authors = []
+
+[addresses]
+Events = "0x82941b22b8d5dde1d438bf05b366e9f54811fd7b08aad748a5568ced18284681"
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-framework"
+
+[dev-dependencies]

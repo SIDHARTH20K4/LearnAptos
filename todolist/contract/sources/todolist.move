@@ -22,7 +22,7 @@ module todolist_addr::todolist {
     public entry fun create_list(account: &signer) {
         let task_holder = TodoList {
             tasks: table::new(),
-            set_task_event: account::new_event_handle<Task>(account),  // This should work now
+            set_task_event: account::new_event_handle<Task>(account),
             task_counter: 0
         };
 
@@ -31,6 +31,7 @@ module todolist_addr::todolist {
 
     public entry fun create_task(account: &signer, content: String) acquires TodoList {
     let signer_address = signer::address_of(account);
+    assert!(exists<TodoList>(signer_address), 1);
 
     let todo_list = borrow_global_mut<TodoList>(signer_address);
 
@@ -51,6 +52,13 @@ module todolist_addr::todolist {
       &mut borrow_global_mut<TodoList>(signer_address).set_task_event,
       new_task,
     );
+  }
+
+  public entry fun complete_task(account: &signer, task_id: u64) acquires TodoList {
+    let signer_address = signer::address_of(account);
+    let todo_list = borrow_global_mut<TodoList>(signer_address);
+    let task_record = table::borrow_mut(&mut todo_list.tasks, task_id);
+    task_record.completed = true;
   }
 }
 

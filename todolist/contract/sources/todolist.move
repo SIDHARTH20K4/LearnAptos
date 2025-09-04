@@ -1,5 +1,4 @@
 module todolist_addr::todolist {
-
     use aptos_framework::event::{Self, EventHandle};
     use aptos_framework::account;
     use std::string::String;
@@ -25,64 +24,57 @@ module todolist_addr::todolist {
             set_task_event: account::new_event_handle<Task>(account),
             task_counter: 0
         };
-
         move_to(account, task_holder);
     }
 
     public entry fun create_task(account: &signer, content: String) acquires TodoList {
-    let signer_address = signer::address_of(account);
-    assert!(exists<TodoList>(signer_address), 1);
+        let signer_address = signer::address_of(account);
+        assert!(exists<TodoList>(signer_address), 1);
 
-    let todo_list = borrow_global_mut<TodoList>(signer_address);
+        let todo_list = borrow_global_mut<TodoList>(signer_address);
+        let counter = todo_list.task_counter + 1;
 
-    let counter = todo_list.task_counter + 1;
+        let new_task = Task {
+            task_id: counter,
+            address: signer_address,
+            content,
+            completed: false
+        };
 
-    let new_task = Task {
-        task_id: counter,
-        address: signer_address,
-        content: content,
-        completed: false
-    };
+        // Update counter first
+        todo_list.task_counter = counter;
 
-    // adds the new task into the tasks table
-    table::upsert(&mut todo_list.tasks, counter, new_task);
+        // Add task to table
+        table::upsert(&mut todo_list.tasks, counter, new_task);
 
-    // fires a new task created event
-    event::emit_event<Task>(
-      &mut borrow_global_mut<TodoList>(signer_address).set_task_event,
-      new_task,
-    );
-  }
+        // Emit event - FIXED: Don't borrow global again!
+        event::emit_event<Task>(
+            &mut todo_list.set_task_event,  // Use existing reference
+            new_task,
+        );
+    }
 
-  public entry fun complete_task(account: &signer, task_id: u64) acquires TodoList {
-    let signer_address = signer::address_of(account);
-    let todo_list = borrow_global_mut<TodoList>(signer_address);
-    let task_record = table::borrow_mut(&mut todo_list.tasks, task_id);
-    task_record.completed = true;
-  }
+    public entry fun complete_task(account: &signer, task_id: u64) acquires TodoList {
+        let signer_address = signer::address_of(account);
+        assert!(exists<TodoList>(signer_address), 2);
+        
+        let todo_list = borrow_global_mut<TodoList>(signer_address);
+        assert!(table::contains(&todo_list.tasks, task_id), 3);
+        
+        let task_record = table::borrow_mut(&mut todo_list.tasks, task_id);
+        task_record.completed = true;
+    }
+
+    // Add a view function to check tasks (doesn't cost gas to read)
+    #[view]
+    public fun get_task(task_list_owner: address, task_id: u64): Task acquires TodoList {
+        let todo_list = borrow_global<TodoList>(task_list_owner);
+        *table::borrow(&todo_list.tasks, task_id)
+    }
+
+    #[view] 
+    public fun get_task_count(task_list_owner: address): u64 acquires TodoList {
+        let todo_list = borrow_global<TodoList>(task_list_owner);
+        todo_list.task_counter
+    }
 }
-
-
-
-// // gets the signer address
-//     let signer_address = signer::address_of(account);
-//     // gets the TodoList resource
-//     let todo_list = borrow_global_mut<TodoList>(signer_address);
-//     // increment task counter
-//     let counter = todo_list.task_counter + 1;
-//     // creates a new Task
-//     let new_task = Task {
-//       task_id: counter,
-//       address: signer_address,
-//       content,
-//       completed: false
-//     };
-//     // adds the new task into the tasks table
-//     table::upsert(&mut todo_list.tasks, counter, new_task);
-//     // sets the task counter to be the incremented counter
-//     todo_list.task_counter = counter;
-//     // fires a new task created event
-//     event::emit_event<Task>(
-//       &mut borrow_global_mut<TodoList>(signer_address).set_task_event,
-//       new_task,
-//     );
